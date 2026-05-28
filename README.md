@@ -1,4 +1,5 @@
 # Vitamin C Concentration in Tomatoes 🍅 and Salads 🥬: Dataset and R Code
+_Nicolas Biot, Rio Dallemagne, Emeline Dierge, Nicolas Dendoncker and Guillaume Lobet (2026)_
 
 ## Overview
 
