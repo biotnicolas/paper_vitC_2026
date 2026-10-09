@@ -1,8 +1,10 @@
 ########################################### Paper Vitamin C ###############################################
 
-# Auteur: Nicolas Biot
+# Author: Nicolas Biot
 # Paper title: ""
 # Inspired from Oriane Dallemagne master thesis (2026, UCLouvain)
+# pre-print: https://hal.science/hal-05663687 
+# paper under submission in PlosOne
 
 # Packages
 
@@ -67,9 +69,9 @@ data_mod <- data_total %>%
 
 ###############
 
-                ##################################################
-                ## 2.1.1 MOD.1 = Total vit C (AA + DHA) ; SALAD ##
-                ##################################################
+##################################################
+## 2.1.1 MOD.1 = Total vit C (AA + DHA) ; SALAD ##
+##################################################
 
 ###############
 
@@ -89,12 +91,12 @@ salade_dtt <- salade_dtt %>%
 
 #Data visualisation
 salad_vitC_tot <- VitC_boxplot(salade_dtt,
-             x_var = "type_production",
-             y_var = "conc_vitaminec",
-             facet_var = "type_magasin",
-             y_label = "Total Vitamin C concentration in Salads [mg/100g]",
-             x_label = ""
-             )
+                               x_var = "type_production",
+                               y_var = "conc_vitaminec",
+                               facet_var = "type_magasin",
+                               y_label = "Total Vitamin C concentration in Salads [mg/100g]",
+                               x_label = ""
+)
 salad_vitC_tot
 
 #Saving graph
@@ -104,7 +106,10 @@ salad_vitC_tot
 
 #Mixed model (log transformation)
 salade_dtt$log_conc_vit <- log(salade_dtt$conc_vitaminec)
-mod_saladtt <- lmer(log_conc_vit ~  type_magasin * type_production + semaine + (1|lieu), data=salade_dtt)
+lot <- paste(salade_dtt$semaine, "-", salade_dtt$lieu)
+salade_dtt$lot <- lot
+
+mod_saladtt <- lmer(log_conc_vit ~  type_magasin * type_production + semaine + (1|lieu) + (1|lot), data=salade_dtt)
 
 #Fixed effect
 anova(mod_saladtt, ddf = "Kenward-Roger") 
@@ -115,7 +120,7 @@ ranova(mod_saladtt)
 #Saving tab
 VitC_tot_ANOVA_salad_table <- anova(mod_saladtt, ddf = "Kenward-Roger")
 VitC_tot_ANOVA_salad_table <- clean_anova_table(VitC_tot_ANOVA_salad_table, rename_map = rename_map) #clean ANOVA table for scientific papers
-write.xlsx(VitC_tot_ANOVA_salad_table, "VitC_tot_ANOVA_salad_table.xlsx", rowNames = TRUE)
+write.xlsx(VitC_tot_ANOVA_salad_table, "S3_Table.xlsx", rowNames = TRUE)
 
 #Mean estimates 
 emm <- emmeans(mod_saladtt, ~ type_production+type_magasin, type = "response", adjust="holm", tran="log")
@@ -126,23 +131,23 @@ pairs((emm))
 
 #Saving tab
 emm_clean <- clean_contrast_table(as.data.frame(pairs(emm)))
-write.xlsx(emm_clean, "salad_vitC_tot_comparison.xlsx", rowNames = FALSE)
+write.xlsx(emm_clean, "S5_Table.xlsx", rowNames = FALSE)
 
 #Visualization 
 emm_df <- as.data.frame(emm)
 
 salad_vitC_tot_stats <- VitC_emm_plot(emm_df,
-              x_var = "type_production",  
-              facet_var = "type_magasin",  
-              y_label = "Total Vitamin C concentration in Salads [mg/100g]",
-              x_label = "",
-              fill_label = "Production type")
+                                      x_var = "type_production",  
+                                      facet_var = "type_magasin",  
+                                      y_label = "Total Vitamin C concentration in Salads [mg/100g]",
+                                      x_label = "",
+                                      fill_label = "Production type")
 salad_vitC_tot_stats
 #Saving graph
 #ggsave("salad_vitC_tot_stats.svg", width = 9, height = 5, dpi = 300)
 
 #Mean comparison by Production types or Supply chain type
-  #By production type
+#By production type
 emm_prod_salad_tot <- emmeans(mod_saladtt, ~ type_production, type = "response", adjust = "holm", tran="log") #att. must specify the log transform via tran
 pairs(emm_prod_salad_tot)
 #pairs(regrid(emm_prod_salad_tot)) # regrid for having the difference BUT less good than the other one if in log
@@ -153,20 +158,20 @@ prod_pairs <- as.data.frame(summary(pairs(emm_prod_salad_tot), adjust = "holm"))
 #graph
 emm_prod_salad_tot <- as.data.frame(emm_prod_salad_tot)
 VitC_tot_plot_prod <- VitC_emm_plot(emm_prod_salad_tot,
-              x_var = "type_production",  
-              y_label = "Total Vitamin C concentration in Salads [mg/100g]",
-              x_label = "",
-              fill_label = "Production type")
+                                    x_var = "type_production",  
+                                    y_label = "Total Vitamin C concentration in Salads [mg/100g]",
+                                    x_label = "",
+                                    fill_label = "Production type")
 VitC_tot_plot_prod
 
-  #By supply chain type
+#By supply chain type
 emm_sc_salad_tot <- emmeans(mod_saladtt, ~ type_magasin, type = "response", adjust = "holm", tran="log")
 pairs(emm_sc_salad_tot)
 #pairs(regrid(emm_sc_salad_tot)) # regrid for having the difference BUT less good than the other one if in log
 #Save tab of comparisons
 sc_pairs   <- as.data.frame(summary(pairs(emm_sc_salad_tot), adjust = "holm"))
 
- #By location
+#By location
 emm_loc_salad_tot <- emmeans(mod_saladtt, ~ semaine, type = "response", adjust = "holm", tran="log")
 pairs(emm_loc_salad_tot)
 #pairs(regrid(emm_loc_salad_tot)) # regrid for having the difference BUT less good than the other one if in log
@@ -178,15 +183,15 @@ loc_pairs   <- as.data.frame(summary(pairs(emm_loc_salad_tot), adjust = "holm"))
 #compile tabs
 VitC_tot_salad_table <- rbind(prod_pairs, sc_pairs, loc_pairs)
 VitC_tot_salad_table <- clean_contrast_table(VitC_tot_salad_table)
-write.xlsx(VitC_tot_salad_table, "salad_vitC_tot.xlsx", rowNames = FALSE)
+write.xlsx(VitC_tot_salad_table, "S4_Table.xlsx", rowNames = FALSE)
 
 #graph
 emm_sc_salad_tot <- as.data.frame(emm_sc_salad_tot)
 VitC_tot_sc_prod <- VitC_emm_plot(emm_sc_salad_tot,
-                                    x_var = "type_magasin",  
-                                    y_label = "Total Vitamin C content in Salads [mg/100g]",
-                                    x_label = "",
-                                    color_var = "type_magasin",
+                                  x_var = "type_magasin",  
+                                  y_label = "Total Vitamin C content in Salads [mg/100g]",
+                                  x_label = "",
+                                  color_var = "type_magasin",
                                   fill_label = "Supply Chain Type")
 #VitC_tot_sc_prod
 
@@ -203,10 +208,10 @@ Plot_vitC_tot_salad
 #ggsave("Plot_vitC_tot_salad.svg", width = 9, height = 5, dpi = 300)
 
 ###############
-                    
-                    ######################################
-                    ## 2.1.2 MOD.2 = vit C (AA) ; SALAD ##
-                    ######################################
+
+######################################
+## 2.1.2 MOD.2 = vit C (AA) ; SALAD ##
+######################################
 
 ###############
 
@@ -239,13 +244,17 @@ salad_vitC_AA_boxplot
 
 #Mixed model (log transformation)
 salade_sdtt$log_conc_vit <- log(salade_sdtt$conc_vitaminec)
-mod_saladsdtt <- lmer(log_conc_vit ~  type_magasin * type_production + semaine + (1|lieu), data=salade_sdtt)
+lot <- paste(salade_sdtt$semaine, "-", salade_sdtt$lieu)
+salade_sdtt$lot <- lot
+
+mod_saladsdtt <- lmer(log_conc_vit ~  type_magasin * type_production + semaine + (1|lieu) +(1|lot), data=salade_sdtt)
+
 #Fixed effect
 anova(mod_saladsdtt, ddf = "Kenward-Roger") 
 #Random effect
 ranova(mod_saladsdtt)
 
-#no significant differences except by location
+#no significant differences except by lot
 
 #By location
 emm_loc_salad_AA <- emmeans(mod_saladsdtt, ~ semaine, type = "response", adjust = "holm", tran="log")
@@ -257,7 +266,7 @@ pairs(emm_loc_salad_AA)
 VitC_AA_salad_table <- anova(mod_saladsdtt, ddf = "Kenward-Roger")
 VitC_AA_ANOVA_salad_table <- clean_anova_table(VitC_AA_salad_table, rename_map = rename_map) #clean ANOVA table for scientific papers
 
-write.xlsx(VitC_AA_ANOVA_salad_table, "VitC_AA_salad_table.xlsx", rowNames = TRUE)
+write.xlsx(VitC_AA_ANOVA_salad_table, "S6_Table.xlsx", rowNames = TRUE)
 
 
 
@@ -267,9 +276,9 @@ write.xlsx(VitC_AA_ANOVA_salad_table, "VitC_AA_salad_table.xlsx", rowNames = TRU
 
 ###############
 
-                  ###################################################
-                  ## 2.2.1 MOD.3 = Total Vit C (AA+DHA) ; TOMATOES ##
-                  ###################################################
+###################################################
+## 2.2.1 MOD.3 = Total Vit C (AA+DHA) ; TOMATOES ##
+###################################################
 
 ###############
 
@@ -288,11 +297,11 @@ tomate_dtt <- tomate_dtt %>%
 ## Data visualisation ##
 
 tomato_vitC_tot_boxplot <- VitC_boxplot(tomate_dtt,
-                                      x_var = "type_production",
-                                      y_var = "conc_vitaminec",
-                                      facet_var = "type_magasin",
-                                      y_label = "Total Vitamin C concentration in Tomatoes [mg/100g]",
-                                      x_label = ""
+                                        x_var = "type_production",
+                                        y_var = "conc_vitaminec",
+                                        facet_var = "type_magasin",
+                                        y_label = "Total Vitamin C concentration in Tomatoes [mg/100g]",
+                                        x_label = ""
 )
 tomato_vitC_tot_boxplot
 #Saving graph
@@ -302,7 +311,10 @@ tomato_vitC_tot_boxplot
 
 #Mixed model (log transformation)
 tomate_dtt$log_conc_toma_dtt <- log(tomate_dtt$conc_vitaminec)
-mod_tomdtt <- lmer(log_conc_toma_dtt ~  type_magasin * type_production + semaine + (1|lieu), data=tomate_dtt)
+lot <- paste(tomate_dtt$semaine, "-", tomate_dtt$lieu)
+tomate_dtt$lot <- lot
+
+mod_tomdtt <- lmer(log_conc_toma_dtt ~  type_magasin * type_production + semaine + (1|lieu) + (1|lot), data=tomate_dtt)
 
 #Fixed effect
 VitC_tot_tomato_table <- anova(mod_tomdtt, ddf = "Kenward-Roger")
@@ -320,21 +332,21 @@ pairs((emm_t))
 #Saving tab
 #Anova table
 VitC_tot_ANOVA_tomato_table <- clean_anova_table(VitC_tot_tomato_table, rename_map = rename_map) #clean ANOVA table for scientific papers
-write.xlsx(VitC_tot_ANOVA_tomato_table, "VitC_tot_tomato_table.xlsx", rowNames = TRUE)
+write.xlsx(VitC_tot_ANOVA_tomato_table, "S7_Table.xlsx", rowNames = TRUE)
 #Contrast table
 #Saving tab
 emm_clean_t <- clean_contrast_table(as.data.frame(pairs(emm_t)))
-write.xlsx(emm_clean_t, "tomato_vitC_tot_main.xlsx", rowNames = FALSE)
+write.xlsx(emm_clean_t, "S9_Table.xlsx", rowNames = FALSE)
 
 #Visualization 
 emm_df_t <- as.data.frame(emm_t)
 
 tomato_vitC_tot_stats <- VitC_emm_plot(emm_df_t,
-                                      x_var = "type_production",  
-                                      facet_var = "type_magasin",  
-                                      y_label = "Total Vitamin C concentration in Tomatoes [mg/100g]",
-                                      x_label = "",
-                                      fill_label = "Production type")
+                                       x_var = "type_production",  
+                                       facet_var = "type_magasin",  
+                                       y_label = "Total Vitamin C concentration in Tomatoes [mg/100g]",
+                                       x_label = "",
+                                       fill_label = "Production type")
 tomato_vitC_tot_stats
 #Saving graph
 #ggsave("tomato_vitC_tot_stats.svg", width = 9, height = 5, dpi = 300)
@@ -352,10 +364,10 @@ prod_pairs_t <- as.data.frame(summary(p_t_pairs, adjust = "holm"))
 #graph
 emm_prod_tomato_tot <- as.data.frame(emm_prod_tomato_tot)
 VitC_tot_plot_prod_t <- VitC_emm_plot(emm_prod_tomato_tot,
-                                    x_var = "type_production",  
-                                    y_label = "Total Vitamin C concentration in Tomatoes [mg/100g]",
-                                    x_label = "",
-                                    fill_label = "Production type")
+                                      x_var = "type_production",  
+                                      y_label = "Total Vitamin C concentration in Tomatoes [mg/100g]",
+                                      x_label = "",
+                                      fill_label = "Production type")
 VitC_tot_plot_prod_t
 
 #By supply chain type
@@ -375,16 +387,16 @@ sc_week_pairs_t   <- as.data.frame(summary(sc_week_pairs, adjust = "holm"))
 #compil tab for comparion (production and supply chain)
 VitC_tot_tomato_table <- rbind(prod_pairs_t, sc_pairs_t,sc_week_pairs_t)
 VitC_tot_tomato_table <- clean_contrast_table(VitC_tot_tomato_table)
-write.xlsx(VitC_tot_tomato_table, "VitC_tot_tomato_table.xlsx", rowNames = FALSE)
+write.xlsx(VitC_tot_tomato_table, "S8_Table.xlsx", rowNames = FALSE)
 
 #graph sc
 emm_sc_tomato_tot <- as.data.frame(emm_sc_tomato_tot)
 VitC_tot_sc_t <- VitC_emm_plot(emm_sc_tomato_tot,
-                                  x_var = "type_magasin",  
-                                  y_label = "Total Vitamin C content in Tomatoes [mg/100g]",
-                                  x_label = "",
-                                  color_var = "type_magasin",
-                                  fill_label = "Supply Chain Type")
+                               x_var = "type_magasin",  
+                               y_label = "Total Vitamin C content in Tomatoes [mg/100g]",
+                               x_label = "",
+                               color_var = "type_magasin",
+                               fill_label = "Supply Chain Type")
 VitC_tot_sc_t
 
 #Main effect graph
@@ -400,9 +412,9 @@ Plot_vitC_tot_tomato
 
 ###############
 
-                  #########################################
-                  ## 2.2.2 MOD.4 = vit C (AA) ; TOMATOES ##
-                  #########################################
+#########################################
+## 2.2.2 MOD.4 = vit C (AA) ; TOMATOES ##
+#########################################
 
 ###############
 
@@ -421,11 +433,11 @@ tomate_sdtt <- tomate_sdtt %>%
 ## Data visualisation ##
 
 tomato_vitC_AA_boxplot <- VitC_boxplot(tomate_sdtt,
-                                        x_var = "type_production",
-                                        y_var = "conc_vitaminec",
-                                        facet_var = "type_magasin",
-                                        y_label = "AA concentration in Tomatoes [mg/100g]",
-                                        x_label = ""
+                                       x_var = "type_production",
+                                       y_var = "conc_vitaminec",
+                                       facet_var = "type_magasin",
+                                       y_label = "AA concentration in Tomatoes [mg/100g]",
+                                       x_label = ""
 )
 tomato_vitC_AA_boxplot
 
@@ -433,7 +445,10 @@ tomato_vitC_AA_boxplot
 
 #Mixed model (log transformation)
 tomate_sdtt$log_conc_toma_sdtt <- log(tomate_sdtt$conc_vitaminec)
-mod_tomsdtt <- lmer(log_conc_toma_sdtt ~  type_magasin * type_production + semaine + (1|lieu), data=tomate_sdtt)
+lot <- paste(tomate_sdtt$semaine, "-", tomate_sdtt$lieu)
+tomate_sdtt$lot <- lot
+
+mod_tomsdtt <- lmer(log_conc_toma_sdtt ~  type_magasin * type_production + semaine + (1|lieu) + (1|lot), data=tomate_sdtt)
 
 #Fixed effect
 AA_Anova_tomato <- anova(mod_tomsdtt, ddf = "Kenward-Roger") 
@@ -452,21 +467,21 @@ main_pairs <- pairs((emm_ts))
 #Saving tab
 #Anova table
 AA_Anova_tomato_table <- clean_anova_table(AA_Anova_tomato, rename_map = rename_map) #clean ANOVA table for scientific papers
-write.xlsx(AA_Anova_tomato_table, "AA_anova_tomato_table.xlsx", rowNames = TRUE)
+write.xlsx(AA_Anova_tomato_table, "S10_Table.xlsx", rowNames = TRUE)
 #Contrast table
 #Saving tab
 emm_clean_AA_t <- clean_contrast_table(as.data.frame(main_pairs))
-write.xlsx(emm_clean_AA_t, "tomato_AA_tot_main.xlsx", rowNames = FALSE)
+write.xlsx(emm_clean_AA_t, "S12_Table.xlsx", rowNames = FALSE)
 
 #Visualization 
 emm_df_t <- as.data.frame(emm_ts)
 
 Plot_AA_tomato <- VitC_emm_plot(emm_df_t,
-                                       x_var = "type_production",
-                                       facet_var = "type_magasin",  
-                                       y_label = "AA concentration in Tomatoes [mg/100g]",
-                                       x_label = "",
-                                       fill_label = "Production type")
+                                x_var = "type_production",
+                                facet_var = "type_magasin",  
+                                y_label = "AA concentration in Tomatoes [mg/100g]",
+                                x_label = "",
+                                fill_label = "Production type")
 Plot_AA_tomato
 
 #Save plot
@@ -484,10 +499,10 @@ prod_pairs_AA <- as.data.frame(summary(p_AA_pairs, adjust = "holm"))
 #graph
 emm_prod_tomato_AA <- as.data.frame(emm_prod_tomato_AA)
 tomato_plot_prod_AA <- VitC_emm_plot(emm_prod_tomato_AA,
-                                      x_var = "type_production",  
-                                      y_label = "AA concentration in Tomatoes [mg/100g]",
-                                      x_label = "",
-                                      fill_label = "Production type")
+                                     x_var = "type_production",  
+                                     y_label = "AA concentration in Tomatoes [mg/100g]",
+                                     x_label = "",
+                                     fill_label = "Production type")
 tomato_plot_prod_AA
 
 #By supply chain type
@@ -501,11 +516,11 @@ sc_pairs_AA   <- as.data.frame(summary(sc_AA_pairs, adjust = "holm"))
 #graph sc
 emm_sc_tomato_AA <- as.data.frame(emm_sc_tomato_AA)
 tomato_sc_AA_plot <- VitC_emm_plot(emm_sc_tomato_AA,
-                               x_var = "type_magasin",  
-                               y_label = "Total Vitamin C content in Tomatoes [mg/100g]",
-                               x_label = "",
-                               color_var = "type_magasin",
-                               fill_label = "Supply Chain Type")
+                                   x_var = "type_magasin",  
+                                   y_label = "Total Vitamin C content in Tomatoes [mg/100g]",
+                                   x_label = "",
+                                   color_var = "type_magasin",
+                                   fill_label = "Supply Chain Type")
 tomato_sc_AA_plot
 #By week
 emm_week_tomato_AA <- emmeans(mod_tomsdtt, ~ semaine, type = "response", adjust = "holm", tran="log")
@@ -517,7 +532,7 @@ sc_week_pairs_AA   <- as.data.frame(summary(sc_week_pairs_AA, adjust = "holm"))
 #compil tab for comparion (production and supply chain)
 AA_tomato_table <- rbind(prod_pairs_AA, sc_pairs_AA,sc_week_pairs_AA)
 AA_tomato_table <- clean_contrast_table(AA_tomato_table)
-write.xlsx(AA_tomato_table, "AA_tomato_table.xlsx", rowNames = FALSE)
+write.xlsx(AA_tomato_table, "S11_Table.xlsx", rowNames = FALSE)
 
 #Main effect graph
 Plot_AA_tomato_main <- tomato_plot_prod_AA + tomato_sc_AA_plot +
@@ -530,9 +545,9 @@ Plot_AA_tomato_main
 #Save graph
 #ggsave("Plot_AA_tomato_main.svg", width = 9, height = 5, dpi = 300)
 
-                      #########################################
-                      ## SUPPL. GRAPHS - Descriptive data    ##
-                      #########################################
+#########################################
+## SUPPL. GRAPHS - Descriptive data    ##
+#########################################
 
 # Salad descriptive
 descr_plot_salad <- (salad_vitC_tot / salad_vitC_AA_boxplot) +
@@ -591,11 +606,11 @@ df_ratio <- df_ratio %>%
 
 
 salad_ratio <- VitC_boxplot(df_ratio,
-                                       x_var = "type_production",
-                                       y_var = "ratio",
-                                       facet_var = "type_magasin",
-                                       y_label = "ratio (DHA/(AA+DHA)) [mg/100g]",
-                                       x_label = ""
+                            x_var = "type_production",
+                            y_var = "ratio",
+                            facet_var = "type_magasin",
+                            y_label = "ratio (DHA/(AA+DHA)) [mg/100g]",
+                            x_label = ""
 )
 salad_ratio
 #for tomato
@@ -615,10 +630,10 @@ df_ratio <- df_ratio %>%
 
 
 tomato_ratio <- VitC_boxplot(df_ratio,
-                            x_var = "type_production",
-                            y_var = "ratio",
-                            facet_var = "type_magasin",
-                            y_label = "ratio (DHA/(AA+DHA)) [mg/100g]",
-                            x_label = ""
+                             x_var = "type_production",
+                             y_var = "ratio",
+                             facet_var = "type_magasin",
+                             y_label = "ratio (DHA/(AA+DHA)) [mg/100g]",
+                             x_label = ""
 )
 tomato_ratio
