@@ -7,7 +7,7 @@ This repository contains the dataset and R code used for analyzing the concentra
 
 ## Dataset
 
-The _Data_set.csv_ file includes the following information:
+The _Data_set.xlsx_ file includes the following information:
 - Vegetable type: Tomatoes or salads.
 - Supply chain type: Supermarket or local farm.
 - Production system: Organic or conventional.
