@@ -3,20 +3,20 @@ _Nicolas Biot, Rio Dallemagne, Emeline Dierge, Nicolas Dendoncker and Guillaume 
 
 ## Overview
 
-This repository contains the dataset and R code used for analyzing the concentration of Vitamin C (total Vitamin C and Ascorbic Acid) in tomatoes and salads. The samples were collected from different supply chain types (supermarkets and local farms) and production systems (organic and conventional) in the Coeur de Condroz region of Belgium in September 2026.
+This repository contains the dataset and R code used for analyzing the concentration of Vitamin C (total Vitamin C and Ascorbic Acid) in tomatoes and salads. The samples were collected from different supply chain types (supermarkets and market gardening farms) and production systems (organic and conventional) in the Coeur de Condroz region of Belgium in September 2026. A pre-print paper is available on: https://hal.science/hal-05663687. 
 
 ## Dataset
 
 The _Data_set.xlsx_ file includes the following information:
 - Vegetable type: Tomatoes or salads.
-- Supply chain type: Supermarket or local farm.
+- Supply chain type: Supermarket (long chain) or Market gardening farms (short chain).
 - Production system: Organic or conventional.
 - Vitamin C concentration: Total Vitamin C and Ascorbic Acid content (with or without dtt), quantified using high-performance liquid chromatography (HPLC).
 
 ## Data Collection
 
 A total of 78 tomato and 66 salad composite samples were collected over two weeks from:
-- 5 local organic farms.
+- 5 market gardening farms.
 - 6 supermarkets.
 
 ## R Scripts
