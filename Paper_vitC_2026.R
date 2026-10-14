@@ -86,7 +86,7 @@ salade_dtt <- data_mod %>%
 salade_dtt <- salade_dtt %>%
   mutate(
     type_production = recode(type_production, "bio" = "Organic", "conv" = "Conventional"),
-    type_magasin = recode(type_magasin, "maraich" = "Local Farms", "superm" = "Supermarkets")
+    type_magasin = recode(type_magasin, "maraich" = "Market gardening farms (short)", "superm" = "Supermarkets (long)")
   )
 
 #Data visualisation
@@ -225,7 +225,7 @@ salade_sdtt <- data_mod %>%
 salade_sdtt <- salade_sdtt %>%
   mutate(
     type_production = recode(type_production, "bio" = "Organic", "conv" = "Conventional"),
-    type_magasin = recode(type_magasin, "maraich" = "Local Farms", "superm" = "Supermarkets")
+    type_magasin = recode(type_magasin, "maraich" = "Market gardening farms (short)", "superm" = "Supermarkets (long)")
   )
 #Data visualisation
 salad_vitC_AA_boxplot <- VitC_boxplot(salade_sdtt,
@@ -291,7 +291,7 @@ tomate_dtt <- data_mod %>%
 tomate_dtt <- tomate_dtt %>%
   mutate(
     type_production = recode(type_production, "bio" = "Organic", "conv" = "Conventional"),
-    type_magasin = recode(type_magasin, "maraich" = "Local Farms", "superm" = "Supermarkets")
+    type_magasin = recode(type_magasin, "maraich" = "Market gardening farms (short)", "superm" = "Supermarkets (long)")
   )
 
 ## Data visualisation ##
@@ -427,7 +427,7 @@ tomate_sdtt <- data_mod %>%
 tomate_sdtt <- tomate_sdtt %>%
   mutate(
     type_production = recode(type_production, "bio" = "Organic", "conv" = "Conventional"),
-    type_magasin = recode(type_magasin, "maraich" = "Local Farms", "superm" = "Supermarkets")
+    type_magasin = recode(type_magasin, "maraich" = "Market gardening farms (short)", "superm" = "Supermarkets (long)")
   )
 
 ## Data visualisation ##
@@ -601,7 +601,7 @@ df_ratio <- salad_ratio %>%
 df_ratio <- df_ratio %>%
   mutate(
     type_production = recode(type_production, "bio" = "Organic", "conv" = "Conventional"),
-    type_magasin = recode(type_magasin, "maraich" = "Local Farms", "superm" = "Supermarkets")
+    type_magasin = recode(type_magasin, "maraich" = "Market gardening farms (short)", "superm" = "Supermarkets (long)")
   )
 
 
@@ -625,7 +625,7 @@ df_ratio <- tomato_ratio %>%
 df_ratio <- df_ratio %>%
   mutate(
     type_production = recode(type_production, "bio" = "Organic", "conv" = "Conventional"),
-    type_magasin = recode(type_magasin, "maraich" = "Local Farms", "superm" = "Supermarkets")
+    type_magasin = recode(type_magasin, "maraich" = "Market gardening farms", "superm" = "Supermarkets (long)")
   )
 
 
